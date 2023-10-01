@@ -56,7 +56,6 @@ use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_tracing::TracingMiddleware;
 use serde_json::json;
 use std::{env, ops::Deref};
-use tokio::signal::unix::SignalKind;
 use tracing::subscriber::set_global_default;
 use tracing_actix_web::TracingLogger;
 use tracing_error::ErrorLayer;
@@ -223,8 +222,8 @@ pub async fn start_lemmy_server(args: CmdArgs) -> Result<(), LemmyError> {
       federation_config.clone(),
     )
   });
-  let mut interrupt = tokio::signal::unix::signal(SignalKind::interrupt())?;
-  let mut terminate = tokio::signal::unix::signal(SignalKind::terminate())?;
+  let mut interrupt = tokio::signal::windows::ctrl_break()?;
+  let mut terminate = tokio::signal::windows::ctrl_shutdown()?;
 
   tokio::select! {
     _ = tokio::signal::ctrl_c() => {
